@@ -5,6 +5,26 @@ HASTE_SERVER="${HASTE_SERVER:-https://hastebin.com}"
 
 API_ENDPOINT="$HASTE_SERVER/documents"
 
+# If curl is version 7.33.0 or greater, explicitly use http1.1 to avoid
+# problems with buggy web server proxies
+additional_curl_flags="$(curl -V \
+    | awk 'FNR==1 { print $1 }' \
+    | awk -F '.' '{
+        major_version=$1
+        minor_version=$2
+
+        if (major_version == 7) {
+            use_http_11 = minor_version >= 33
+        } else {
+            use_http_11 = major_version > 7
+        }
+        if (use_http_11) {
+            print "--http1.1"
+        }
+    }'
+)"
+echo "$additional_curl_flags"
+
 function print_usage_and_exit() {
     cat << EOF
 Usage: $0 [-h] [-- <files>]
@@ -27,7 +47,7 @@ EOF
 
 
 function do_upload() {
-    curl -s -X POST --data-binary '@-' "$API_ENDPOINT" \
+    curl -s -X POST $additional_curl_flags --data-binary '@-' "$API_ENDPOINT" \
         | sed  -E '
             # Extract document key from json. This properly handles escaped
             # quotation marks, even though I expect they will never be present.
