@@ -5,7 +5,7 @@ SERVER='https://hastebin.com'
 
 API_ENDPOINT="$SERVER/documents"
 
-function printUsageAndExit() {
+function print_usage_and_exit() {
     cat << EOF
 Usage: $0 [-h] [-- <files>]
 
@@ -26,7 +26,7 @@ EOF
 }
 
 
-function doUpload() {
+function do_upload() {
     curl -s -X POST -d '@-' "$API_ENDPOINT" \
         | sed  -E '
             # Extract document key from json. This properly handles escaped
@@ -57,12 +57,12 @@ if [[ "$#" -gt 0 ]]; then
                         arg_processing_mode=upload
                         ;;
                     *)
-                        printUsageAndExit
+                        print_usage_and_exit
                         ;;
                 esac
                 ;;
             upload)
-                doUpload < "$arg"
+                do_upload < "$arg"
                 ;;
             *)
                 echo "Error: Unknown arg processing state" 1>&2
@@ -75,7 +75,7 @@ elif [[ -t 0 ]]; then
     # pipe, the user likely wants to know how to use shaste, rather than wanting
     # to upload text they type. If they want the second use case, they can use
     # `cat | shaste`
-    printUsageAndExit
+    print_usage_and_exit
 else
-    doUpload
+    do_upload
 fi
