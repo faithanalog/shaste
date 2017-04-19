@@ -19,7 +19,7 @@ Usage: shaste [-h] [-- <files>]
     -- <files>
 
       All arguments following a '--' will be treated as filenames. Each file
-      will be uplaoded separately, and URLs will be returned separated by
+      will be uploaded separately, and URLs will be returned separated by
       newlines. If this argument is not present, STDIN will be uploaded
       instead.
 ```
