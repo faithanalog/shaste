@@ -1,9 +1,9 @@
 #!/bin/bash
 set -eu
 
-SERVER='https://hastebin.com'
+HASTE_SERVER="${HASTE_SERVER:-https://hastebin.com}"
 
-API_ENDPOINT="$SERVER/documents"
+API_ENDPOINT="$HASTE_SERVER/documents"
 
 function print_usage_and_exit() {
     cat << EOF
@@ -27,11 +27,11 @@ EOF
 
 
 function do_upload() {
-    curl -s -X POST -d '@-' "$API_ENDPOINT" \
+    curl -s -X POST --data-binary '@-' "$API_ENDPOINT" \
         | sed  -E '
             # Extract document key from json. This properly handles escaped
             # quotation marks, even though I expect they will never be present.
-            s#^\{"key":"(([^"]|\\")+)"\}$#\1#g
+            s#^\{.*"key":"(([^"]|\\")+)".*\}$#\1#g
 
             # Unescape escaped quotation marks
             s#\\"#"#g
@@ -40,7 +40,7 @@ function do_upload() {
             s#$#\n#g
 
             # Prepend server URL
-        '"  s#^#$SERVER/#g "
+        '"  s#^#$HASTE_SERVER/#g "
 }
 
 
