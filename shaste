@@ -45,9 +45,9 @@ function do_upload() {
 
 
 if [[ "$#" -gt 0 ]]; then
-    # Process args.
-    # If the '--' argument is encountered, all other args are treated as files
-    # to be uploaded
+    # Process arguments.
+    # If the '--' argument is encountered, the rest of the arguments after it
+    # are treated as files to be uploaded.
     arg_processing_mode=normal
     for arg in "$@"; do
         case $arg_processing_mode in
