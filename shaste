@@ -23,7 +23,6 @@ additional_curl_flags="$(curl -V \
         }
     }'
 )"
-echo "$additional_curl_flags"
 
 function print_usage_and_exit() {
     cat << EOF
