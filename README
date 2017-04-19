@@ -1,6 +1,6 @@
-# `shaste` - A Simple Haste Client
+# `shaste` - A Simple Hastebin Client
 
-`shaste` is a simple bash [haste](https://hastebin.com) client.
+`shaste` is a simple bash [hastebin](https://hastebin.com) client.
 
 `shaste` uses `curl` for requests. It is the only dependency aside from the
 usual coreutils.
