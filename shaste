@@ -1,9 +1,11 @@
 #!/bin/bash
+set -eu
+
 SERVER='https://hastebin.com'
 
 API_ENDPOINT="$SERVER/documents"
 
-function printUsage() {
+function printUsageAndExit() {
     cat << EOF
 Usage: $0 [-h] [-- <files>]
 
@@ -16,38 +18,36 @@ Usage: $0 [-h] [-- <files>]
     -- <files>
 
       All arguments following a '--' will be treated as filenames. Each file
-      will be uplaoded separately, and URLs will be returned separated by
+      will be uploaded separately, and URLs will be returned separated by
       newlines. If this argument is not present, STDIN will be uploaded
       instead.
 EOF
+    exit 0
 }
 
 
 function doUpload() {
     curl -s -X POST -d '@-' "$API_ENDPOINT" \
         | sed  -E '
-            #Extract document key from json. This properly handles escaped
-            #quotation marks, even though I expect they will never be present.
-
+            # Extract document key from json. This properly handles escaped
+            # quotation marks, even though I expect they will never be present.
             s#^\{"key":"(([^"]|\\")+)"\}$#\1#g
 
-            #Unescape escaped quotation marks
-
+            # Unescape escaped quotation marks
             s#\\"#"#g
 
-            #Append newline to the end, because haste doesnt include one.
+            # Append newline to the end, because haste doesnt include one.
             s#$#\n#g
 
-            #Prepend server URL
-
+            # Prepend server URL
         '"  s#^#$SERVER/#g "
 }
 
 
 if [[ "$#" -gt 0 ]]; then
-    #Process args.
-    #If the '--' argument is encountered, all other args are treated as files
-    #to be uploaded
+    # Process args.
+    # If the '--' argument is encountered, all other args are treated as files
+    # to be uploaded
     arg_processing_mode=normal
     for arg in "$@"; do
         case $arg_processing_mode in
@@ -57,8 +57,7 @@ if [[ "$#" -gt 0 ]]; then
                         arg_processing_mode=upload
                         ;;
                     *)
-                        printUsage
-                        exit 0
+                        printUsageAndExit
                         ;;
                 esac
                 ;;
@@ -71,6 +70,12 @@ if [[ "$#" -gt 0 ]]; then
                 ;;
         esac
     done
+elif [[ -t 0 ]]; then
+    # If shaste is executed directly with no arguments, rather than as part of a
+    # pipe, the user likely wants to know how to use shaste, rather than wanting
+    # to upload text they type. If they want the second use case, they can use
+    # `cat | shaste`
+    printUsageAndExit
 else
     doUpload
 fi
